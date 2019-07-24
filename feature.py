@@ -26,7 +26,7 @@ class Feature:
 			class_path = os.path.join(self.training_directory, category)
 			for wav_files in os.listdir(class_path):
 				data, sampling_rate = librosa.load(os.path.join(class_path, wav_files), mono = True, sr = sampling_rate, res_type = resampling_type)
-				mel_power_spectrogram_feature = melspectrogram(data, sr = sampling_rate)
+				mel_power_spectrogram_feature = melspectrogram(data, sr = sampling_rate, n_mels = 32)
 				label = categories.index(category)
 				emotion_feature_label.append([mel_power_spectrogram_feature, label])
 		return emotion_feature_label
