@@ -30,7 +30,9 @@ class Cnn1D:
 		#model selection
 		model = Sequential()
 
-		model.add(Dense(256, input_shape = (32,21)))
+		model.add(Flatten(data_format = channels_last))
+
+		model.add(Dense(256))
 		model.add(Activation('relu'))
 
 		model.add(Dense(256))
@@ -40,7 +42,7 @@ class Cnn1D:
 		model.add(Dense(CLASSES))
 		model.add(Activation('softmax'))
 
-		return model
+		return model, X_train, y_train
 
 if __name__ == '__main__':
 
@@ -54,8 +56,8 @@ if __name__ == '__main__':
 
 	cnn = Cnn1D()
 
-	model = cnn.define_model(working_directory, training_directory, happy_path, sad_path, confused_path, neutral_path)
+	model, X_train, y_train = cnn.define_model(working_directory, training_directory, happy_path, sad_path, confused_path, neutral_path)
 
-	model.compile(loss = 'binary_crossentropy', optimizers = 'adam', metrics = ['accuracy'])
+	model.compile(loss = 'binary_crossentropy', optimizer = 'adam', metrics = ['accuracy'])
 
 	model.fit(X_train, y_train, batch_size = 32, epochs = 5, validation_split = .2)
