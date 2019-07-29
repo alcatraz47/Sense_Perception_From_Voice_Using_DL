@@ -19,6 +19,19 @@ class Feature:
 		self.neutral_path = neutral_path
 
 	#feature extractor
+
+	# def feature_extraction_mfcc(self, categories, sampling_rate, resampling_type):
+	# 	emotion_feature_label = []
+	# 	for category in categories:
+	# 		class_path = os.path.join(self.training_directory, category)
+	# 		for wav_files in os.listdir(class_path):
+	# 			data, sampling_rate = librosa.load(os.path.join(class_path, wav_files), mono = True, sr = sampling_rate, res_type = resampling_type)
+	# 			mel_power_spectrogram_feature = melspectrogram(data, sr = sampling_rate, n_mels = 32)
+	# 			label = categories.index(category)
+	# 			mel_power_spectrogram_feature = np.asarray(mel_power_spectrogram_feature)
+	# 			emotion_feature_label.append([mel_power_spectrogram_feature, label])
+	# 	return emotion_feature_label
+
 	#now feature extraction and label function for whole dataset
 	def feature_extraction(self, categories, sampling_rate, resampling_type):
 		emotion_feature_label = []
@@ -26,8 +39,9 @@ class Feature:
 			class_path = os.path.join(self.training_directory, category)
 			for wav_files in os.listdir(class_path):
 				data, sampling_rate = librosa.load(os.path.join(class_path, wav_files), mono = True, sr = sampling_rate, res_type = resampling_type)
-				mel_power_spectrogram_feature = melspectrogram(data, sr = sampling_rate, n_mels = 32)
+				mel_power_spectrogram_feature = np.mean(melspectrogram(data, sr = sampling_rate, n_mels = 32).T, axis = 0)
 				label = categories.index(category)
+				mel_power_spectrogram_feature = np.asarray(mel_power_spectrogram_feature)
 				emotion_feature_label.append([mel_power_spectrogram_feature, label])
 		return emotion_feature_label
 
