@@ -2,7 +2,7 @@ import os
 import pickle
 import numpy as np
 import matplotlib.pyplot as plt
-from keras.models import Sequential
+from keras.models import Sequential, Model
 from keras.layers import *
 from keras.optimizers import Adam
 from keras.utils import np_utils
@@ -34,38 +34,20 @@ def plot_model_history(model_history):
     axs[1].set_xlabel('Epoch')
     axs[1].set_xticks(np.arange(1,len(model_history.history['loss'])+1),len(model_history.history['loss'])/10)
     axs[1].legend(['train', 'val'], loc='best')
-    fig.savefig('cnn2d.png')
+    fig.savefig('cnn1d_test.png')
     plt.show()
 
 class Cnn1D:
 
-	def define_cnn_model(self, working_directory, training_directory, old_Talker_Angry, old_Talker_Disgust, old_Talker_Fear, old_Talker_Happy, old_Talker_Neutral, old_Talker_Pleasent_Surprise, old_Talker_Sad):
+	def __init__(self, classes):
+		self.CLASSES = classes
 
-		#necessary directories for feature class
-		self.working_directory = working_directory
-		self.training_directory = training_directory
-		self.old_Talker_Angry = old_Talker_Angry
-		self.old_Talker_Disgust = old_Talker_Disgust
-		self.old_Talker_Fear = old_Talker_Fear
-		self.old_Talker_Happy = old_Talker_Happy
-		self.old_Talker_Neutral = old_Talker_Neutral
-		self.old_Talker_Pleasent_Surprise = old_Talker_Pleasent_Surprise
-		self.old_Talker_Sad = old_Talker_Sad
-        # self.young_Talker_Angry = young_Talker_Angry
-        # self.young_Talker_Fear = young_Talker_Fear
-        # self.young_Talker_Neutral = young_Talker_Neutral
-        # self.young_Talker_Pleasant_Surprise = young_Talker_Pleasant_Surprise
-        # self.young_Talker_Sad = young_Talker_Sad
-        # self.young_Walker_Disgust = young_Walker_Disgust
-        # self.younger_Talker_Happy = younger_Talker_Happy
+	def define_cnn_model(self):
 
-		#feture extraction
-		CLASSES = ['Old_Talker_Angry', 'Old_Talker_Disgust', 'Old_Talker_Fear', 'Old_Talker_Happy', 'Old_Talker_Neutral', 'Old_Talker_Pleasent_Surprise', 'Old_Talker_Sad']
-		
-		pickle_in = open("X.pickle","rb")
+		pickle_in = open("X_train_mfcc_42000.pickle","rb")
 		X_train = pickle.load(pickle_in)
 
-		pickle_in = open("y.pickle","rb")
+		pickle_in = open("y_train_mfcc_42000.pickle","rb")
 		y_train = pickle.load(pickle_in)		
 		
 		#converting to array
@@ -74,62 +56,40 @@ class Cnn1D:
 		X_train = X_train.reshape(X_train.shape[0], X_train.shape[1],1)
 
 		#model selection
-		model = Sequential()
+		data = Input(shape = (32,1))
+		x = Conv1D(100, 10, padding = 'same', activation = 'relu', kernel_regularizer = l2(0.001))(data)
+		x = Dropout(.25)(x)
+		x = MaxPooling1D(2)(x)
 
-		model.add(Conv1D(100, 10, padding = 'same', input_shape = (32,1), kernel_regularizer = l2(0.0001)))
-		model.add(Activation('relu'))
+		x = Conv1D(100, 10, padding = 'same', activation = 'relu', kernel_regularizer = l2(0.001))(x)
+		x = Dropout(.25)(x)
+		x = MaxPooling1D(2)(x)
 
-		model.add(Conv1D(100, 10, padding = 'same', kernel_regularizer = l2(0.0001)))
-		model.add(Activation('relu'))
-		model.add(MaxPool1D(2))
+		x = Conv1D(100, 5, activation = 'relu', kernel_regularizer = l2(0.001))(x)
+		x = Dropout(.25)(x)
 
-		model.add(Conv1D(160, 5, kernel_regularizer = l2(0.0001)))
-		model.add(Activation('relu'))
+		x = Conv1D(100, 5, activation = 'relu', kernel_regularizer = l2(0.001))(x)
+		x = Dropout(.25)(x)
 
-		model.add(Conv1D(160, 5, kernel_regularizer = l2(0.0001)))
-		model.add(Activation('relu'))
+		x = Flatten()(x)
 
-		model.add(Flatten())
+		x = Dense(256, activation = 'relu')(x)
+		x = Dropout(.50)(x)
 
-		model.add(Dense(256))
-		model.add(Activation('relu'))
-
-		#model.add(Dropout(0.5))
-
-		model.add(Dense(len(CLASSES)))
-		model.add(Activation('softmax'))
+		x = Dense(len(CLASSES), activation = 'softmax')(x)
+		
+		model = Model(data, x)
 
 		return model, X_train, y_train
 
 class Cnn2D:
 
-	def define_cnn_model(self, working_directory, training_directory, old_Talker_Angry, old_Talker_Disgust, old_Talker_Fear, old_Talker_Happy, old_Talker_Neutral, old_Talker_Pleasent_Surprise, old_Talker_Sad):
-
-		#necessary directories for feature class
-		self.working_directory = working_directory
-		self.training_directory = training_directory
-		self.old_Talker_Angry = old_Talker_Angry
-		self.old_Talker_Disgust = old_Talker_Disgust
-		self.old_Talker_Fear = old_Talker_Fear
-		self.old_Talker_Happy = old_Talker_Happy
-		self.old_Talker_Neutral = old_Talker_Neutral
-		self.old_Talker_Pleasent_Surprise = old_Talker_Pleasent_Surprise
-		self.old_Talker_Sad = old_Talker_Sad
-        # self.young_Talker_Angry = young_Talker_Angry
-        # self.young_Talker_Fear = young_Talker_Fear
-        # self.young_Talker_Neutral = young_Talker_Neutral
-        # self.young_Talker_Pleasant_Surprise = young_Talker_Pleasant_Surprise
-        # self.young_Talker_Sad = young_Talker_Sad
-        # self.young_Walker_Disgust = young_Walker_Disgust
-        # self.younger_Talker_Happy = younger_Talker_Happy
-
-		#feture extraction
-		CLASSES = ['Old_Talker_Angry', 'Old_Talker_Disgust', 'Old_Talker_Fear', 'Old_Talker_Happy', 'Old_Talker_Neutral', 'Old_Talker_Pleasent_Surprise', 'Old_Talker_Sad']
+	def define_cnn_model(self):
 		
-		pickle_in = open("X.pickle","rb")
+		pickle_in = open("X_train_mfcc_32000.pickle","rb")
 		X_train = pickle.load(pickle_in)
 
-		pickle_in = open("y.pickle","rb")
+		pickle_in = open("y_train_mfcc_32000.pickle","rb")
 		y_train = pickle.load(pickle_in)		
 		
 		#converting to array
@@ -167,21 +127,25 @@ if __name__ == '__main__':
 	old_Talker_Pleasent_Surprise = os.path.join(training_directory, 'Old_Talker_Pleasent_Surprise')
 	old_Talker_Sad = os.path.join(training_directory, 'Old_Talker_Sad')
 
-	#cnn = Cnn1D()
-	cnn = Cnn2D()
+	CLASSES = ['Old_Talker_Angry', 'Old_Talker_Disgust', 'Old_Talker_Fear', 'Old_Talker_Happy', 'Old_Talker_Neutral', 'Old_Talker_Pleasent_Surprise', 'Old_Talker_Sad']
 
-	model, X_train, y_train = cnn.define_cnn_model(working_directory, training_directory, old_Talker_Angry, old_Talker_Disgust, old_Talker_Fear, old_Talker_Happy, old_Talker_Neutral, old_Talker_Pleasent_Surprise, old_Talker_Sad)
+	cnn = Cnn1D(CLASSES)
+	# cnn = Cnn2D(CLASSES)
+
+	model, X_train, y_train = cnn.define_cnn_model()
 
 	init_lr = 0.0001
 	total_epochs = 100
 	opt = Adam(lr = init_lr, decay = init_lr / total_epochs)
 	model.compile(loss = 'categorical_crossentropy', optimizer = opt, metrics = ['accuracy'])
 
+	model.summary()
+
 	model_info = model.fit(X_train, y_train, batch_size = 20, epochs = total_epochs, validation_split = .2)
 	plot_model_history(model_info)
 	model_json = model.to_json()
-	with open("model_cnn2d_old_talker.json", "w") as json_file:
+	with open("model_mfcc_cnn1d_test.json", "w") as json_file:
 		json_file.write(model_json)
 		# serialize weights to HDF5
-		model.save_weights("model_cnn2d_old_talker.h5")
+		model.save_weights("model_mfcc_cnn1d_test.h5")
 		print("Saved model to disk")
