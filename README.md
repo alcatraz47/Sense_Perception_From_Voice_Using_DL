@@ -44,5 +44,5 @@ After that, we created a test by our self to see how it responds to completely n
 
 ### For contact:
 
-Md. Mahmudul Haque: mahmudulhaquearfan@gmail.com
-Sharif Ahamed: sharifahamed485@gmail.com
+- Md. Mahmudul Haque: mahmudulhaquearfan@gmail.com
+- Sharif Ahamed: sharifahamed485@gmail.com
